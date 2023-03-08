@@ -133,7 +133,7 @@ class sphere(shape_3d):
         """
         Inherits from the 3d shape class, creates a spherical object
         """
-        super().__init__(radius,surface_area,volume,circumference,diameter)
+        super().__init__(radius = r,surface_area,volume,circumference,diameter)
         self.radius = radius
         self.surface_area = 4*sym.pi*self.radius**2
         self.volume = (4/3)*sym.pi*self.radius**3
@@ -147,8 +147,5 @@ testsphere = sphere(radius=3)
 print(testsphere.calculate_surface_area())
 
 """
-Harry can you work on adding self.faces to all the 3d shape types and adding function to 3d shape class to display all the faces in the 3d object
-Niko and Callum can you work on creating more simple 2d and 3d shapes
-Can both of you please upload your work and I will work on merging them
-Thank you , Ollie
+Harry can add a choosen side attriubte to the 3d shape class and next week we will need a meeting. I would like Callum and Niko to start working on the readme documentation
 """
