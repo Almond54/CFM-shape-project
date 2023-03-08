@@ -1,7 +1,7 @@
 
 import sympy as sym
 import math
-x,y,z,r,A,V = sym.symbols('x, y, z, r, A, V')
+x,y,z,r,A,V,C,D = sym.symbols('x, y, z, r, A, V,C,D')
 
 class shape_3d:
     def __init__(self, surface_area = A, volume = V, width = x, height = y, depth = z):
@@ -12,6 +12,7 @@ class shape_3d:
             > Width
             > Height
             > Depth
+            > Faces (Will be defined by other functions)
         The class is just used to inherit from other 3d shapes 
         """
         self.surface_area = surface_area
@@ -19,6 +20,17 @@ class shape_3d:
         self.width = width
         self.height = height
         self.depth = depth
+        self.faces = []
+    def Show_Faces(self):
+        """
+        This function will display the faces on a given 3d shape
+        """
+        for x in self.faces:
+            print(x.shape_name + "with area:" + x.area)
+            if x.shape_name == "Circle":
+                pass
+            else:
+                print("And angles:" + x.angles)
 
 class shape_2d:
     """
@@ -29,7 +41,17 @@ class shape_2d:
         self.base = base
         self.height = height
         self.placeability = placeability
-        
+
+class circle(shape_2d):
+    """
+    This class represents a given circle
+    """
+    def __init__(self, radius = r, circumference = c, placeability = True):
+        self.radius = r
+        self.circumference = C
+        self.placeability = True
+        self.area = sym.pi * (r ** 2)
+        self.shape_name = "Circle"
 
 class quadrilateral(shape_2d):
     """
@@ -58,6 +80,9 @@ class rectangle(quadrilateral):
         self.sides = [self.base, self.height , self.base, self.height]
         print(self.sides)
         self.area = math.prod(self.sides)
+        self.shape_name = "rectangle"
+
+
 
 
 class cylinder(shape_3d):
@@ -70,6 +95,7 @@ class cylinder(shape_3d):
         self.radius = radius
         self.top = sym.pi * self.radius ** 2
         self.curved_surface = 2 * sym.pi * self.height * self.radius ** 2
+        self.faces = [rectangle(base = sym.pi * 2 * self.radius, height = self.height)] + [circle(radius = radius, circumference = self.radius * 2 * sym.pi, placeability=True) for x in range (2)]
     def calculate_surface_area(self):
         self.surface_area = 2 * self.top + self.curved_surface
         return self.surface_area
@@ -100,6 +126,25 @@ class cuboid(shape_3d):
 
 testcube = cuboid()
 print(testcube.faces)
+testcube.Show_Faces()
+                           
+class sphere(shape_3d):
+    def __init__(self,radius=r,surface_area=A,volume=V,circumference=C,diameter=D):
+        """
+        Inherits from the 3d shape class, creates a spherical object
+        """
+        super().__init__(radius,surface_area,volume,circumference,diameter)
+        self.radius = radius
+        self.surface_area = 4*sym.pi*self.radius**2
+        self.volume = (4/3)*sym.pi*self.radius**3
+        self.circumference = 2*sym.pi*self.radius
+        self.diameter = 2*self.radius
+    def calculate_surface_area(self):
+        surface_area = 4*sym.pi*self.radius**2
+        return self.surface_area
+
+testsphere = sphere(radius=3)
+print(testsphere.calculate_surface_area())
 
 """
 Harry can you work on adding self.faces to all the 3d shape types and adding function to 3d shape class to display all the faces in the 3d object
