@@ -1,4 +1,3 @@
-
 import sympy as sym
 import math
 x,y,z,r,A,V,C,D = sym.symbols('x, y, z, r, A, V,C,D')
@@ -25,12 +24,13 @@ class shape_3d:
         """
         This function will display the faces on a given 3d shape
         """
+        Faces = []
         for x in self.faces:
-            print(x.shape_name + "with area:" + x.area)
             if x.shape_name == "Circle":
-                pass
+                Faces.append(x.shape_name + "with radius" + str(x.radius))
             else:
-                print("And angles:" + x.angles)
+                Faces.append(x.shape_name + "with area:" + str(x.area) + "And angles:" + str(x.angles))
+        return(Faces)
 
 class shape_2d:
     """
@@ -46,7 +46,7 @@ class circle(shape_2d):
     """
     This class represents a given circle
     """
-    def __init__(self, radius = r, circumference = c, placeability = True):
+    def __init__(self, radius = r, circumference = C, placeability = True):
         self.radius = r
         self.circumference = C
         self.placeability = True
@@ -80,7 +80,10 @@ class rectangle(quadrilateral):
         self.sides = [self.base, self.height , self.base, self.height]
         print(self.sides)
         self.area = math.prod(self.sides)
-        self.shape_name = "rectangle"
+        if self.base == self.height:
+            self.shape_name = "square"
+        else:
+            self.shape_name = "rectangle"
 
 
 
@@ -129,22 +132,24 @@ print(testcube.faces)
 testcube.Show_Faces()
                            
 class sphere(shape_3d):
-    def __init__(self,radius=r,surface_area=A,volume=V,circumference=C,diameter=D):
+    def __init__(self,radius=r):
         """
         Inherits from the 3d shape class, creates a spherical object
         """
-        super().__init__(radius = r,surface_area,volume,circumference,diameter)
         self.radius = radius
         self.surface_area = 4*sym.pi*self.radius**2
         self.volume = (4/3)*sym.pi*self.radius**3
         self.circumference = 2*sym.pi*self.radius
         self.diameter = 2*self.radius
+        super().__init__(radius=r, SA=4*sym.pi*self.radius**2, V=(4/3)*sym.pi*self.radius**3, C=2*sym.pi*self.radius, D=2*self.radius)
     def calculate_surface_area(self):
         surface_area = 4*sym.pi*self.radius**2
         return self.surface_area
+    def Show_Faces(self):
+        print("Sphere does not have faces")
 
-testsphere = sphere(radius=3)
-print(testsphere.calculate_surface_area())
+#testsphere = sphere(radius=3)
+#print(testsphere.calculate_surface_area())
 
 """
 Harry can add a choosen side attriubte to the 3d shape class and next week we will need a meeting. I would like Callum and Niko to start working on the readme documentation
