@@ -3,7 +3,7 @@ import math
 x,y,z,r,A,V,C,D = sym.symbols('x, y, z, r, A, V,C,D')
 
 class shape_3d:
-    def __init__(self, surface_area = A, volume = V, width = x, height = y, depth = z):
+    def __init__(self, faces = [], volume = V, width = x, height = y, depth = z):
         """
         The initialiser function for 3d shapes. Just a skeleton containing the shapes properties as follows:
             > Surface area
@@ -14,23 +14,55 @@ class shape_3d:
             > Faces (Will be defined by other functions)
         The class is just used to inherit from other 3d shapes 
         """
-        self.surface_area = surface_area
         self.volume = volume
         self.width = width
         self.height = height
         self.depth = depth
-        self.faces = []
+        self.faces = faces
+        self.selected_face = None
     def Show_Faces(self):
         """
         This function will display the faces on a given 3d shape
         """
         Faces = []
-        for x in self.faces:
+        for index,x in enumerate(self.faces):
             if x.shape_name == "Circle":
-                Faces.append(x.shape_name + "with radius" + str(x.radius))
+                Faces.append(index+ " with " + x.shape_name + "and radius" + str(x.radius))
             else:
-                Faces.append(x.shape_name + "with area:" + str(x.area) + "And angles:" + str(x.angles))
+                Faces.append(x.shape_name + " with sides: " + str(x.sides) + "And angles:" + str(x.angles))
         return(Faces)
+    def __add__(self, other):
+        """
+        Boogie Method on adding different 3d shapes to each other
+        """
+        side_one = self.selected_face
+        side_two = other.selected_face
+        if compare_faces(side_one,side_two) == True:
+            return self.create_new_object(other)
+        else:
+            return self
+    def choose_face(self, index):
+        """
+        This method allows you to choose your the face you are performing addition on
+        """
+        try: self.selected_face = self.faces[index]
+        except IndexError: pass
+    def create_new_object(self, other):
+        """
+        This is the algorithm to format the new shape being created so it can be added
+        """
+        face_list_one = self.faces
+        face_list_two = other.faces
+        face_list_one.remove(self.selected_face)
+        face_list_two.remove(other.selected_face)
+        combined_face_list = face_list_one + face_list_two
+        total_volume = self.volume + other.volume
+        return shape_3d(faces=combined_face_list, volume= total_volume)
+    def calcuate_surface_area(self):
+        """
+        Just returns the sum of all the areas of the 2d shapes in the faces list
+        """
+        return sum(self.faces)
 
 class shape_2d:
     """
@@ -42,6 +74,7 @@ class shape_2d:
         self.height = height
         self.placeability = placeability
 
+
 class circle(shape_2d):
     """
     This class represents a given circle
@@ -52,6 +85,14 @@ class circle(shape_2d):
         self.placeability = True
         self.area = sym.pi * (r ** 2)
         self.shape_name = "Circle"
+
+
+    
+    def __dir__(self):
+        """
+        Overrided so comparing two different shapes 
+        """
+        return [self.radius]
 
 class quadrilateral(shape_2d):
     """
@@ -76,40 +117,35 @@ class rectangle(quadrilateral):
     def __init__(self, base=x, height=y, placeability=True):
         super().__init__(base, height, placeability)
         angles = [sym.pi / 2, sym.pi / 2, sym.pi / 2, sym.pi / 2]
-        print(self.base)
         self.sides = [self.base, self.height , self.base, self.height]
-        print(self.sides)
         self.area = math.prod(self.sides)
         if self.base == self.height:
             self.shape_name = "square"
         else:
             self.shape_name = "rectangle"
+    def __dir__(self):
+        return [self.sides]
 
 
 
 
 class cylinder(shape_3d):
 
-    def __init__(self, surface_area=A, volume=V, width=x, height=y, depth=z, radius = r):
+    def __init__(self, surface_area=A, width=x, height=y, depth=z, radius = r):
         """
         This class inherits from the 3d shape class, with added properties su
         """
-        super().__init__(surface_area, volume, width, height, depth)
+        super().__init__(surface_area, width, height, depth)
         self.radius = radius
         self.top = sym.pi * self.radius ** 2
+        self.volume = self.radius ** 2 * sym.pi * self.height
         self.curved_surface = 2 * sym.pi * self.height * self.radius ** 2
         self.faces = [rectangle(base = sym.pi * 2 * self.radius, height = self.height)] + [circle(radius = radius, circumference = self.radius * 2 * sym.pi, placeability=True) for x in range (2)]
     def calculate_surface_area(self):
         self.surface_area = 2 * self.top + self.curved_surface
         return self.surface_area
 
-
 test = cylinder(height= 50, radius= 4)
-
-print(test.calculate_surface_area())
-
-wickked = shape_3d(surface_area=5)
-
 
 class cuboid(shape_3d):
     """
@@ -128,9 +164,7 @@ class cuboid(shape_3d):
         return sum(self.faces)
 
 testcube = cuboid()
-print(testcube.faces)
-testcube.Show_Faces()
-                           
+testcube.Show_Faces()                    
 class sphere(shape_3d):
     def __init__(self,radius=r):
         """
@@ -154,3 +188,9 @@ class sphere(shape_3d):
 """
 Harry can add a choosen side attriubte to the 3d shape class and next week we will need a meeting. I would like Callum and Niko to start working on the readme documentation
 """
+
+def compare_faces(face_one, face_two):
+    if dir(face_one) == dir(face_two):
+        return True
+    else:
+        return False
