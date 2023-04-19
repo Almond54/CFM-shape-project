@@ -112,7 +112,9 @@ class rectangle(quadrilateral):
     Class that creates a rectangle shape
     """
     def __init__(self, base=x, height=y, placeability=True):
-        super().__init__(base, height, placeability)
+        super().__init__(placeability)
+        self.base = base
+        self.height = height
         angles = [sym.pi / 2, sym.pi / 2, sym.pi / 2, sym.pi / 2]
         self.sides = [self.base, self.height , self.base, self.height]
         self.area = math.prod(self.sides)
@@ -138,7 +140,7 @@ class cylinder(shape_3d):
         self.top = sym.pi * self.radius ** 2
         self.volume = self.radius ** 2 * sym.pi * self.height
         self.curved_surface = 2 * sym.pi * self.height * self.radius ** 2
-        self.faces = [rectangle(base = sym.pi * 2 * self.radius, height = self.height)] + [circle(radius = radius, circumference = self.radius * 2 * sym.pi, placeability=True) for x in range (2)]
+        self.faces = [rectangle(base = sym.pi * 2 * self.radius, height = self.height)] + [circle(radius = radius, placeability=True) for x in range (2)]
     def calculate_surface_area(self):
         self.surface_area = 2 * self.top + self.curved_surface
         return self.surface_area
@@ -188,7 +190,8 @@ class triangle(shape_2d):
         super().__init__(placeability)
         self.angles = angles
         self.sides = sides
-        self.area = 0.5 * sides[0] * sides[1] * sym.cos(angles[2])
+        self.area = 0.5 * sides[0] * sides[1] * sym.sin(angles[2])
+
 
 class square_based_pyramid(shape_3d):
 
@@ -197,10 +200,13 @@ class square_based_pyramid(shape_3d):
         self.height = height
         self.depth = depth
         self.volume = self.width ** 2 * self.height / 3
-        self.faces = [rectangle(width = width, height= height)]
-    def calculate_surface_area(self):
-        self.surface_area  = (2 * (sym.sqrt(3)) + self.width * 2)
-        return self.surface_area
+        self.faces = [rectangle(base= width, height= height)] + [self.get_triangle_faces(width, height) for x in range(4)]
+    def get_triangle_faces(self, width, height):
+        """
+        we know the triangles for the squarebased pyramid will be isoleces so this function creates the triangles and returns in into a list for the faces array
+        """
+        pyramid_triangle = triangle([180 - sym.tan(height/(width/2)), sym.tan(height/(width/2)), sym.tan(height/(width/2))], [sym.sqrt((width/2)**2 + height ** 2), sym.sqrt((width/2)**2 + height ** 2), width])
+        return pyramid_triangle
    
 class cone(shape_3d):
     def __init__(self, radius=r, height=y):
@@ -211,3 +217,6 @@ class cone(shape_3d):
         self.volume = (1/3) * sym.pi * self.height * (self.readius ** 2)
     def calculate_surface_area(self):
         self.surface_area = (sym.pi * self.radius ** 2) + (sym.pi * self.radius * (sym.sqrt((self.radius ** 2) + (self.height ** 2))))
+
+test_pyramid = square_based_pyramid()
+print(test_pyramid.faces)
