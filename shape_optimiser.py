@@ -3,7 +3,7 @@ import math
 x,y,z,r,A,V,C,D = sym.symbols('x, y, z, r, A, V,C,D')
 
 class shape_3d:
-    def __init__(self, faces = [], volume = V, width = x, height = y, depth = z):
+    def __init__(self, faces = [], volume = V):
         """
         The initialiser function for 3d shapes. Just a skeleton containing the shapes properties as follows:
             > Surface area
@@ -15,9 +15,6 @@ class shape_3d:
         The class is just used to inherit from other 3d shapes 
         """
         self.volume = volume
-        self.width = width
-        self.height = height
-        self.depth = depth
         self.faces = faces
         self.selected_face = None
     def Show_Faces(self):
@@ -27,9 +24,9 @@ class shape_3d:
         Faces = []
         for index,x in enumerate(self.faces):
             if x.shape_name == "Circle":
-                Faces.append(index+ " with " + x.shape_name + "and radius" + str(x.radius))
+                Faces.append(index+ " with " + x.shape_name + "and radius " + str(x.radius))
             else:
-                Faces.append(x.shape_name + " with sides: " + str(x.sides) + "And angles:" + str(x.angles))
+                Faces.append(str(index) + " " + x.shape_name + " with sides: " + str(x.sides) + "And angles:" + str(x.angles))
         return(Faces)
     def __add__(self, other):
         """
@@ -41,7 +38,7 @@ class shape_3d:
             return self.create_new_object(other)
         else:
             return self
-    def choose_face(self, index):
+    def select_face(self, index):
         """
         This method allows you to choose your the face you are performing addition on
         """
@@ -50,10 +47,12 @@ class shape_3d:
     def create_new_object(self, other):
         """
         This is the algorithm to format the new shape being created so it can be added
+        it is not meant to be run normally
         """
         face_list_one = self.faces
         face_list_two = other.faces
         face_list_one.remove(self.selected_face)
+        print(face_list_one)
         face_list_two.remove(other.selected_face)
         combined_face_list = face_list_one + face_list_two
         total_volume = self.volume + other.volume
@@ -62,16 +61,13 @@ class shape_3d:
         """
         Just returns the sum of all the areas of the 2d shapes in the faces list
         """
-        return sum(self.faces)
+        return sum(face.area for face in self.faces)
 
 class shape_2d:
     """
     basic skeleton for a 2d shape 
     """
-    def __init__(self, area = A, base = x, height = y, placeability = False):
-        self.area = area
-        self.base = base
-        self.height = height
+    def __init__(self, placeability = False):
         self.placeability = placeability
 
 
@@ -79,10 +75,10 @@ class circle(shape_2d):
     """
     This class represents a given circle
     """
-    def __init__(self, radius = r, circumference = C, placeability = True):
-        self.radius = r
-        self.circumference = C
-        self.placeability = True
+    def __init__(self, radius = r, placeability = True):
+        self.radius = radius
+        self.circumference = 2*radius*sym.pi
+        self.placeability = placeability
         self.area = sym.pi * (r ** 2)
         self.shape_name = "Circle"
 
@@ -98,11 +94,12 @@ class quadrilateral(shape_2d):
     """
     This class represents the common object of a quadrilatrial 
     """
-    def __init__(self, base=x, height=y, placeability=True, angles = [sym.pi / 2, sym.pi / 2 , sym.pi / 2, sym.pi / 2], sides = [1 ,1 ,1 ,1]):
+    def __init__(self, placeability=True, angles = [sym.pi / 2, sym.pi / 2 , sym.pi / 2, sym.pi / 2], sides = [1 ,1 ,1 ,1]):
         self.angles = angles
         self.sides = sides
+        self.perimeter = sum(sides)
         self.area = self.calculate_area()
-        super().__init__(base= base,height= height, placeability= placeability)
+        super().__init__(placeability= placeability)
     def calculate_area(self):
         """
         This uses Bretshneider's formula
@@ -131,11 +128,12 @@ class rectangle(quadrilateral):
 
 class cylinder(shape_3d):
 
-    def __init__(self, surface_area=A, width=x, height=y, depth=z, radius = r):
+    def __init__(self, height=y, radius = r):
         """
         This class inherits from the 3d shape class, with added properties su
         """
-        super().__init__(surface_area, width, height, depth)
+        super().__init__()
+        self.height = height
         self.radius = radius
         self.top = sym.pi * self.radius ** 2
         self.volume = self.radius ** 2 * sym.pi * self.height
@@ -157,30 +155,21 @@ class cuboid(shape_3d):
         """
         super().__init__(surface_area, volume, width, height, depth)
         self.faces = [rectangle(base= width, height= height) for x in range(2)] + [rectangle(base=depth, height= height) for x in range(2)] + [rectangle(base=width, height=depth) for x in range(2)]
-    def caculate_surface_area(self):
-        """
-        Returns the sum of all the areas of the 2d shapes
-        """
-        return sum(self.faces)
-
-testcube = cuboid()
-testcube.Show_Faces()                    
+                 
 class sphere(shape_3d):
     def __init__(self,radius=r):
         """
         Inherits from the 3d shape class, creates a spherical object
         """
+        super().__init__()
         self.radius = radius
-        self.surface_area = 4*sym.pi*self.radius**2
         self.volume = (4/3)*sym.pi*self.radius**3
         self.circumference = 2*sym.pi*self.radius
         self.diameter = 2*self.radius
-        super().__init__(radius=r, SA=4*sym.pi*self.radius**2, V=(4/3)*sym.pi*self.radius**3, C=2*sym.pi*self.radius, D=2*self.radius)
-    def calculate_surface_area(self):
-        surface_area = 4*sym.pi*self.radius**2
-        return self.surface_area
+    def calculate_surface_area(self): 
+        return 4*sym.pi*self.radius**2
     def Show_Faces(self):
-        print("Sphere does not have faces")
+        return"Sphere does not have faces"
 
 #testsphere = sphere(radius=3)
 #print(testsphere.calculate_surface_area())
@@ -194,3 +183,31 @@ def compare_faces(face_one, face_two):
         return True
     else:
         return False
+class triangle(shape_2d):
+    def __init__(self, placeability=True, angles = [sym.pi / 3, sym.pi / 3, sym.pi / 3], sides = [1, 1, 1]):
+        super().__init__(placeability)
+        self.angles = angles
+        self.sides = sides
+        self.area = 0.5 * sides[0] * sides[1] * sym.cos(angles[2])
+
+class square_based_pyramid(shape_3d):
+
+    def __init__(self, width=x, height=y, depth = z):
+        self.width = width
+        self.height = height
+        self.depth = depth
+        self.volume = self.width ** 2 * self.height / 3
+        self.faces = [rectangle(width = width, height= height)]
+    def calculate_surface_area(self):
+        self.surface_area  = (2 * (sym.sqrt(3)) + self.width * 2)
+        return self.surface_area
+   
+class cone(shape_3d):
+    def __init__(self, radius=r, height=y):
+        super().__init__()
+        self.faces = []
+        self.radius = radius
+        self.height = height
+        self.volume = (1/3) * sym.pi * self.height * (self.readius ** 2)
+    def calculate_surface_area(self):
+        self.surface_area = (sym.pi * self.radius ** 2) + (sym.pi * self.radius * (sym.sqrt((self.radius ** 2) + (self.height ** 2))))
